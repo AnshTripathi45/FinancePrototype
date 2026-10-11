@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finding the Next Signal | Autonomous Financial Research Agent (Track C)</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Chart.js for financial data visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-badge">
+        <span class="logo-pulse"></span>
+        <span class="logo-text">ATMOS 2026</span>
+      </div>
+      <div class="header-titles">
+        <h1>FINDING THE NEXT SIGNAL</h1>
+        <p class="subtitle">Track C: Consumer, FMCG & Retail · Autonomous Financial Research Investigator</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="badge track-badge">Sector: Track C (FMCG)</span>
+      <button id="viewModeDashboardBtn" class="nav-tab active">Interactive Dashboard</button>
+      <button id="viewModeReportBtn" class="nav-tab">Equity Research Report</button>
+      <button id="printReportBtn" class="btn-secondary" title="Export as PDF">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        Print / PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- Company Selector & Agent Controls Bar -->
+    <section class="control-panel">
+      <div class="control-row">
+        <div class="input-group">
+          <label for="companyInput">Select or Enter NIFTY 50 FMCG Company:</label>
+          <div class="input-with-button">
+            <input type="text" id="companyInput" placeholder="e.g. BRITANNIA, HINDUNILVR, TATACONSUM, or any ticker..." value="BRITANNIA">
+            <button id="runInvestigationBtn" class="btn-primary">
+              <span class="spinner" id="btnSpinner" style="display:none;"></span>
+              <svg id="searchIcon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              Investigate Public Evidence
+            </button>
+          </div>
+        </div>
+
+        <div class="quick-picks">
+          <span class="quick-label">Track C Tickers:</span>
+          <button class="pill active" data-ticker="BRITANNIA">BRITANNIA</button>
+          <button class="pill" data-ticker="HINDUNILVR">HINDUNILVR</button>
+          <button class="pill" data-ticker="TATACONSUM">TATACONSUM</button>
+          <button class="pill" data-ticker="NESTLEIND">NESTLEIND</button>
+          <button class="pill" data-ticker="ITC">ITC</button>
+          <button class="pill peer" data-ticker="GODREJCP">GODREJCP (Peer)</button>
+        </div>
+      </div>
+
+      <!-- Autonomous Agent Workflow Stepper -->
+      <div class="agent-stepper" id="agentStepper">
+        <div class="step-node" id="step-discover">
+          <div class="node-icon">1</div>
+          <div class="node-meta">
+            <span class="node-name">Discover</span>
+            <span class="node-desc">Filings & Decks</span>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-node" id="step-connect">
+          <div class="node-icon">2</div>
+          <div class="node-meta">
+            <span class="node-name">Connect</span>
+            <span class="node-desc">Cross-Filings</span>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-node" id="step-calculate">
+          <div class="node-icon">3</div>
+          <div class="node-meta">
+            <span class="node-name">Calculate</span>
+            <span class="node-desc">Vol/DSO Ratios</span>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-node" id="step-reason">
+          <div class="node-icon">4</div>
+          <div class="node-meta">
+            <span class="node-name">Reason</span>
+            <span class="node-desc">Form Hypothesis</span>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-node" id="step-challenge">
+          <div class="node-icon">5</div>
+          <div class="node-meta">
+            <span class="node-name">Challenge</span>
+            <span class="node-desc">Self-Falsification</span>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-node" id="step-prove">
+          <div class="node-icon">6</div>
+          <div class="node-meta">
+            <span class="node-name">Prove</span>
+            <span class="node-desc">Auditable Trail</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE INVESTIGATION STATUS BANNER -->
+    <div id="liveAgentLogBanner" class="agent-log-banner" style="display:none;">
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span id="currentAgentName">Agent: ScoutAgent</span>
+      </div>
+      <div class="live-text" id="currentAgentLog">Scanning quarterly volume disclosures in investor presentation...</div>
+    </div>
+
+    <!-- VIEW 1: INTERACTIVE UI DASHBOARD -->
+    <div id="dashboardView" class="view-panel active">
+
+      <!-- THE DISCOVERY HERO CARD (MANDATORY ELEMENT 1) -->
+      <section class="card discovery-hero">
+        <div class="discovery-header">
+          <div class="card-badge">THE DISCOVERY · AUTONOMOUS FINDING</div>
+          <div class="discovery-meta">
+            <span id="targetCompanyBadge" class="company-tag">Britannia Industries Ltd</span>
+            <span id="evidenceStrengthBadge" class="strength-badge strength-moderate">Evidence Strength: Moderate</span>
+            <span id="execTimeBadge" class="time-tag">Time: 0.12s</span>
+          </div>
+        </div>
+        <blockquote class="discovery-statement" id="discoverySentence">
+          Loading autonomous discovery finding...
+        </blockquote>
+      </section>
+
+      <!-- 2-COLUMN GRID: WHY IT MATTERS & EVIDENCE STRENGTH -->
+      <div class="grid-2col">
+        
+        <!-- WHY IT MATTERS (MANDATORY ELEMENT 2) -->
+        <section class="card">
+          <div class="card-title">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Why It Matters (3–5 Significant Impacts)
+          </div>
+          <ul class="impact-list" id="whyItMattersList">
+            <li>Loading implications...</li>
+          </ul>
+        </section>
+
+        <!-- DEVIL'S ADVOCATE & FALSIFICATION (MANDATORY ELEMENTS 6 & 7) -->
+        <section class="card falsification-card">
+          <div class="card-title text-warning">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Devil's Advocate & Self-Falsification Engine
+          </div>
+          <div class="falsification-section">
+            <div class="sub-label">Strongest Counterargument / Alternative Explanation:</div>
+            <p class="counterargument-text" id="counterargumentText">Loading counterargument...</p>
+          </div>
+          <div class="falsification-section">
+            <div class="sub-label">Falsification Condition (What Disproves the Thesis):</div>
+            <p class="falsification-text" id="falsificationConditionText">Loading condition...</p>
+          </div>
+          <div class="strength-breakdown">
+            <span class="sub-label">Strength Justification:</span>
+            <span id="strengthReasoningText" class="reasoning-text">Triangulated across multi-source primary disclosures.</span>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- FORENSIC NUMBERS & CHARTS (MANDATORY ELEMENT 5) -->
+      <section class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Numbers & Forensic Vector Calculations
+          <span class="diagnostic-pill" id="calcDiagnosticSummary">Diagnostic summary</span>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-box">
+            <div class="chart-header">
+              <span class="chart-title">Revenue Growth vs Underlying Volume Growth (UVG) vs Price Realization</span>
+              <span class="chart-hint">% YoY per Quarter</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="growthDecompositionChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-header">
+              <span class="chart-title">Trade Receivables & Distributor Debtor Days (DSO)</span>
+              <span class="chart-hint">Working Capital Strain Indicator</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="receivablesDsoChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculated Metrics Table -->
+        <div class="table-container">
+          <table class="financial-table" id="quarterlyMetricsTable">
+            <thead>
+              <tr>
+                <th>Quarter</th>
+                <th>Reported Revenue Growth</th>
+                <th>Underlying Volume Growth (UVG)</th>
+                <th>Price / Mix Realization</th>
+                <th>Volume Contribution</th>
+                <th>Trade Receivables (₹ Cr)</th>
+                <th>Debtor Days (DSO)</th>
+              </tr>
+            </thead>
+            <tbody id="metricsTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TIMELINE OF EMERGENCE (MANDATORY ELEMENT 4) -->
+      <section class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Timeline: When the Divergence Emerged & Developed
+        </div>
+        <div class="timeline-container" id="timelineContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- AUDITABLE EVIDENCE TRAIL (MANDATORY ELEMENT 3) -->
+      <section class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Auditable Multi-Source Evidence Trail (Click to inspect verified excerpts)
+          <span class="evidence-count-badge" id="evidenceCountBadge">5 Sources Verified</span>
+        </div>
+        <div class="evidence-grid" id="evidenceGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- PEER SECTOR BENCHMARKING (TRIANGULATION) -->
+      <section class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          Sector Peer Cross-Triangulation (Divergence vs Industry Macros)
+        </div>
+        <div class="peers-grid" id="peerGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- VIEW 2: PROFESSIONAL EQUITY RESEARCH REPORT (PDF PRINT READY) -->
+    <div id="reportView" class="view-panel">
+      <article class="report-document" id="printableReport">
+        
+        <header class="report-header">
+          <div class="report-banner">
+            <div class="report-firm">
+              <span class="firm-name">FINDING THE NEXT SIGNAL RESEARCH</span>
+              <span class="firm-tag">ATMOS 2026 · Autonomous Financial Intelligence</span>
+            </div>
+            <div class="report-meta-box">
+              <div class="meta-row"><strong>Sector Track:</strong> Track C — Consumer, FMCG & Retail</div>
+              <div class="meta-row"><strong>Target Security:</strong> <span id="reportHeaderTicker">BRITANNIA</span> (NSE/BSE)</div>
+              <div class="meta-row"><strong>Evidence Conviction:</strong> <span id="reportHeaderConviction">MODERATE</span></div>
+              <div class="meta-row"><strong>Date:</strong> October 2026</div>
+            </div>
+          </div>
+          <h1 class="report-headline" id="reportHeadlineTitle">EQUITY FORENSIC DISCOVERY NOTE</h1>
+          <p class="report-subline">Autonomous Cross-Filing Triangulation & Growth Quality Audit</p>
+        </header>
+
+        <section class="report-section">
+          <h2 class="report-sec-title">1. The Non-Obvious Discovery</h2>
+          <div class="report-callout" id="reportDiscoveryText">
+            Discovery statement...
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2 class="report-sec-title">2. Why It Matters (Key Significance)</h2>
+          <div id="reportWhyItMatters">
+            <!-- bullets -->
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2 class="report-sec-title">3. Forensic Numbers & Empirical Substantiation</h2>
+          <div id="reportNumbersText" class="report-text">
+            <!-- calculations -->
+          </div>
+          <div class="report-table-wrapper" id="reportTableContainer">
+            <!-- table -->
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2 class="report-sec-title">4. Chronological Divergence Timeline</h2>
+          <div id="reportTimelineContainer">
+            <!-- timeline -->
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2 class="report-sec-title">5. Devil's Advocate & Self-Falsification Test</h2>
+          <div class="report-grid-2">
+            <div class="report-box">
+              <h3>Strongest Counterargument / Alternative Hypothesis</h3>
+              <p id="reportCounterargumentText"></p>
+            </div>
+            <div class="report-box">
+              <h3>Strict Falsification Condition</h3>
+              <p id="reportFalsificationText"></p>
+            </div>
+          </div>
+          <div class="report-strength-box">
+            <strong>Evidence Strength:</strong> <span id="reportEvidenceStrengthVal"></span> — <span id="reportEvidenceStrengthReason"></span>
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2 class="report-sec-title">6. Auditable Evidence Trail & Primary Sources</h2>
+          <div id="reportSourcesContainer" class="report-sources-list">
+            <!-- sources with links -->
+          </div>
+        </section>
+
+        <footer class="report-footer">
+          <p>Autonomously produced by NextSignal Track-C Investigator Engine · ATMOS 2026, BITS Pilani Hyderabad Campus.</p>
+          <p><em>Notice: This dossier is an autonomous empirical forensic discovery report for academic and research competition evaluation; it does not constitute investment advice.</em></p>
+        </footer>
+
+      </article>
+    </div>
+
+  </main>
+
+  <script src="precomputed_dossiers.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
