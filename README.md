@@ -101,7 +101,6 @@ signal-c-prototype/
 
 ---
 
-## 🏆 Round 1 Submission Deliverables (Due 19 Oct, 11:59 PM IST)
-1. **Solution Report (Required):** Follows all 8 evaluation criteria in `docs/ROUND1_SOLUTION_REPORT.md`. Can be rendered to PDF as `TeamName_TrackC_Round1.pdf`.
+
 2. **Working MVP (Appreciated):** Working FastAPI + Web UI ready for live demonstration.
 3. **Demo Video:** Follows the 1m50s script in `docs/DEMO_VIDEO_SCRIPT.md`.
